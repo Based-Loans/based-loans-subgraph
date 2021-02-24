@@ -1,4 +1,6 @@
-# Comptroller global variables
+"""
+The Comptroller type has protocol level variables stored
+"""
 type Comptroller @entity {
     "ID is set to 1"
     id: ID!
@@ -12,8 +14,10 @@ type Comptroller @entity {
     maxAssets: BigInt
 }
 
-# Market inforamtion for a CToken
-type Market @entity { # TODO rename to CToken, not market AND ALL OTHERS
+"""
+Market stores all high level variables for a cToken market
+"""
+type Market @entity {
     #Fields that match compounds API
     "Yearly borrow rate. With 2102400 blocks per year"
     borrowRate: BigDecimal!
@@ -27,10 +31,6 @@ type Market @entity { # TODO rename to CToken, not market AND ALL OTHERS
     interestRateModelAddress: Bytes!
     "Name of the cToken"
     name: String!
-    "Number of borrowers active in the market"
-    numberOfBorrowers: Int!
-    "Number of suppliers active in the market"
-    numberOfSuppliers: Int!
     "Reserves stored in the contract"
     reserves: BigDecimal!
     "Yearly supply rate. With 2104400 blocks per year"
@@ -67,7 +67,10 @@ type Market @entity { # TODO rename to CToken, not market AND ALL OTHERS
     underlyingDecimals: Int!
 }
 
-# Users within the protocol
+"""
+Account is an ETH address, with a list of all cToken markets the account has
+participated in, along with liquidation information.
+"""
 type Account @entity {
     "User ETH address"
     id: ID!
@@ -92,7 +95,10 @@ type Account @entity {
     # totalCollateralValueInEth: BigDecimal!
 }
 
-# Stats for an accounts borrow and supply of an asset
+"""
+AccountCToken is a single account within a single cToken market, with data such
+as interest earned or paid
+"""
 type AccountCToken @entity {
     "Concatenation of CToken address and user address"
     id: ID!
@@ -102,12 +108,10 @@ type AccountCToken @entity {
     symbol: String!
     "Relation to user"
     account: Account!
-    "Hashes of all user transactions"
-    transactionHashes: [Bytes!]!
-    "Times of all user transactions"
-    transactionTimes: [Int!]!
+    "Transactions data"
+    transactions: [AccountCTokenTransaction!]! @derivedFrom(field:"account")
     "Block number this asset was updated at in the contract"
-    accrualBlockNumber: Int!
+    accrualBlockNumber: BigInt!
     "True if user is entered, false if they are exited"
     enteredMarket: Boolean!
 
@@ -141,4 +145,198 @@ type AccountCToken @entity {
 
     # lifetimeBorrowInterestAccrued: BigDecimal!
     # FORMULA: lifetimeBorrowInterestAccrued = borrowBalanceUnderlying - totalUnderlyingBorrowed + totalUnderlyingRepaid
+}
+
+"""
+Auxiliary entity for AccountCToken
+"""
+type AccountCTokenTransaction @entity {
+  id: ID!
+
+  account: AccountCToken!
+
+  tx_hash: Bytes!
+
+  timestamp: BigInt!
+
+  block: BigInt!
+
+  logIndex: BigInt!
+}
+
+"""
+An interface for a transfer of any cToken. TransferEvent, MintEvent,
+RedeemEvent, and LiquidationEvent all use this interface
+"""
+interface CTokenTransfer {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "cTokens transferred"
+    amount: BigDecimal!
+    "Account that received tokens"
+    to: Bytes!
+    "Account that sent tokens"
+    from: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "Symbol of the cToken transferred"
+    cTokenSymbol: String!
+}
+
+"""
+TransferEvent will be stored for every mint, redeem, liquidation, and any normal
+transfer between two accounts.
+"""
+type TransferEvent implements CTokenTransfer @entity {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "cTokens transferred"
+    amount: BigDecimal!
+    "Account that received tokens"
+    to: Bytes!
+    "Account that sent tokens"
+    from: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "Symbol of the cToken transferred"
+    cTokenSymbol: String!
+}
+
+"""
+MintEvent stores information for mints. From address will always be a cToken
+market address
+"""
+type MintEvent implements CTokenTransfer @entity {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "cTokens transferred"
+    amount: BigDecimal!
+    "Account that received tokens (minter)"
+    to: Bytes!
+    "Account that sent tokens (CToken contract)"
+    from: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "Symbol of the cToken transferred"
+    cTokenSymbol: String!
+    "Underlying token amount transferred"
+    underlyingAmount: BigDecimal
+}
+
+"""
+RedeemEvent stores information for redeems. To address will always be a
+cToken market address
+"""
+type RedeemEvent implements CTokenTransfer @entity {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "cTokens transferred"
+    amount: BigDecimal!
+    "Account that received tokens (CToken contract)"
+    to: Bytes!
+    "Account that sent tokens (redeemer)"
+    from: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "Symbol of the cToken transferred"
+    cTokenSymbol: String!
+    "Underlying token amount transferred"
+    underlyingAmount: BigDecimal
+}
+
+"""
+LiquidationEvent stores information for liquidations. The event is emitted from
+the cToken market address.
+"""
+type LiquidationEvent implements CTokenTransfer @entity {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "cTokens seized"
+    amount: BigDecimal!
+    "Liquidator receiving tokens"
+    to: Bytes!
+    "Account being liquidated (borrower)"
+    from: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "cToken that was sezied as collateral"
+    cTokenSymbol: String!
+    "Symbol of the underlying asset repaid through liquidation"
+    underlyingSymbol: String!
+    "Underlying cToken amount that was repaid by liquidator"
+    underlyingRepayAmount: BigDecimal!
+}
+
+"""
+Underlying transfers are transfers of underlying collateral for both borrows
+and repays
+"""
+interface UnderlyingTransfer {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "Amount of underlying borrowed"
+    amount: BigDecimal!
+    "Total borrows of this asset the account has"
+    accountBorrows: BigDecimal!
+    "Account that borrowed the tokens"
+    borrower: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "Symbol of the borrowed underlying asset"
+    underlyingSymbol: String!
+}
+
+"""
+BorrowEvent stores information for borrows
+"""
+type BorrowEvent implements UnderlyingTransfer @entity {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "Amount of underlying borrowed"
+    amount: BigDecimal!
+    "Total borrows of this asset the account has"
+    accountBorrows: BigDecimal!
+    "Account that borrowed the tokens"
+    borrower: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "Symbol of the borrowed underlying asset"
+    underlyingSymbol: String!
+}
+
+"""
+RepayEvent stores information for repays. Payer is not always the same as
+borrower, such as in the event of a Liquidation
+"""
+type RepayEvent implements UnderlyingTransfer @entity {
+    "Transaction hash concatenated with log index"
+    id: ID!
+    "Amount of underlying repaid"
+    amount: BigDecimal!
+    "Total borrows of this asset the account has"
+    accountBorrows: BigDecimal!
+    "Account that borrowed the tokens"
+    borrower: Bytes!
+    "Block number"
+    blockNumber: Int!
+    "Block time"
+    blockTime: Int!
+    "Symbol of the borrowed underlying asset"
+    underlyingSymbol: String!
+    "Payer of the borrow funds"
+    payer: Bytes!
 }
