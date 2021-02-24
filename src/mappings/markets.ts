@@ -1,14 +1,14 @@
 /* eslint-disable prefer-const */ // to satisfy AS compiler
 
 // For each division by 10, add one to exponent to truncate one significant figure
-import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts/index'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { Market, Comptroller } from '../types/schema'
 // PriceOracle is valid from Comptroller deployment until block 8498421
-import { PriceOracle } from '../types/cREP/PriceOracle'
+import { PriceOracle } from '../types/templates/CToken/PriceOracle'
 // PriceOracle2 is valid from 8498422 until present block (until another proxy upgrade)
-import { PriceOracle2 } from '../types/cREP/PriceOracle2'
-import { ERC20 } from '../types/cREP/ERC20'
-import { CToken } from '../types/cREP/CToken'
+import { PriceOracle2 } from '../types/templates/CToken/PriceOracle2'
+import { ERC20 } from '../types/templates/CToken/ERC20'
+import { CToken } from '../types/templates/CToken/CToken'
 
 import {
   exponentToBigDecimal,
@@ -117,7 +117,7 @@ export function createMarket(marketAddress: string): Market {
     market.underlyingPrice = BigDecimal.fromString('1')
     market.underlyingName = 'Ether'
     market.underlyingSymbol = 'ETH'
-
+    market.underlyingPriceUSD = zeroBD
     // It is all other CERC20 contracts
   } else {
     market = new Market(marketAddress)
@@ -131,35 +131,48 @@ export function createMarket(marketAddress: string): Market {
       market.underlyingName = 'Dai Stablecoin v1.0 (DAI)'
       market.underlyingSymbol = 'DAI'
     }
+    market.underlyingPriceUSD = zeroBD
+    market.underlyingPrice = zeroBD
     if (marketAddress == cUSDCAddress) {
       market.underlyingPriceUSD = BigDecimal.fromString('1')
     }
   }
 
+  let interestRateModelAddress = contract.try_interestRateModel()
+  let reserveFactor = contract.try_reserveFactorMantissa()
+
   market.borrowRate = zeroBD
   market.cash = zeroBD
   market.collateralFactor = zeroBD
   market.exchangeRate = zeroBD
-  market.interestRateModelAddress = Address.fromString(
-    '0x0000000000000000000000000000000000000000',
-  )
+  market.interestRateModelAddress = interestRateModelAddress.reverted
+    ? Address.fromString('0x0000000000000000000000000000000000000000')
+    : interestRateModelAddress.value
   market.name = contract.name()
-  market.numberOfBorrowers = 0
-  market.numberOfSuppliers = 0
   market.reserves = zeroBD
   market.supplyRate = zeroBD
   market.symbol = contract.symbol()
   market.totalBorrows = zeroBD
   market.totalSupply = zeroBD
-  market.underlyingPrice = zeroBD
 
   market.accrualBlockNumber = 0
   market.blockTimestamp = 0
   market.borrowIndex = zeroBD
-  market.reserveFactor = BigInt.fromI32(0)
-  market.underlyingPriceUSD = zeroBD
+  market.reserveFactor = reserveFactor.reverted ? BigInt.fromI32(0) : reserveFactor.value
 
   return market
+}
+
+// Only to be used after block 10678764, since it's aimed to fix the change to USD based price oracle.
+function getETHinUSD(blockNumber: i32): BigDecimal {
+  let comptroller = Comptroller.load('1')
+  let oracleAddress = comptroller.priceOracle as Address
+  let oracle = PriceOracle2.bind(oracleAddress)
+  let ethPriceInUSD = oracle
+    .getUnderlyingPrice(Address.fromString(cETHAddress))
+    .toBigDecimal()
+    .div(mantissaFactorBD)
+  return ethPriceInUSD
 }
 
 export function updateMarket(
@@ -177,26 +190,51 @@ export function updateMarket(
   if (market.accrualBlockNumber != blockNumber) {
     let contractAddress = Address.fromString(market.id)
     let contract = CToken.bind(contractAddress)
-    let usdPriceInEth = getUSDCpriceETH(blockNumber)
 
-    // if cETH, we only update USD price
-    if (market.id == cETHAddress) {
-      market.underlyingPriceUSD = market.underlyingPrice
-        .div(usdPriceInEth)
-        .truncate(market.underlyingDecimals)
+    // After block 10678764 price is calculated based on USD instead of ETH
+    if (blockNumber > 10678764) {
+      let ethPriceInUSD = getETHinUSD(blockNumber)
+
+      // if cETH, we only update USD price
+      if (market.id == cETHAddress) {
+        market.underlyingPriceUSD = ethPriceInUSD.truncate(market.underlyingDecimals)
+      } else {
+        let tokenPriceUSD = getTokenPrice(
+          blockNumber,
+          contractAddress,
+          market.underlyingAddress as Address,
+          market.underlyingDecimals,
+        )
+        market.underlyingPrice = tokenPriceUSD
+          .div(ethPriceInUSD)
+          .truncate(market.underlyingDecimals)
+        // if USDC, we only update ETH price
+        if (market.id != cUSDCAddress) {
+          market.underlyingPriceUSD = tokenPriceUSD.truncate(market.underlyingDecimals)
+        }
+      }
     } else {
-      let tokenPriceEth = getTokenPrice(
-        blockNumber,
-        contractAddress,
-        market.underlyingAddress as Address,
-        market.underlyingDecimals,
-      )
-      market.underlyingPrice = tokenPriceEth.truncate(market.underlyingDecimals)
-      // if USDC, we only update ETH price
-      if (market.id != cUSDCAddress) {
+      let usdPriceInEth = getUSDCpriceETH(blockNumber)
+
+      // if cETH, we only update USD price
+      if (market.id == cETHAddress) {
         market.underlyingPriceUSD = market.underlyingPrice
           .div(usdPriceInEth)
           .truncate(market.underlyingDecimals)
+      } else {
+        let tokenPriceEth = getTokenPrice(
+          blockNumber,
+          contractAddress,
+          market.underlyingAddress as Address,
+          market.underlyingDecimals,
+        )
+        market.underlyingPrice = tokenPriceEth.truncate(market.underlyingDecimals)
+        // if USDC, we only update ETH price
+        if (market.id != cUSDCAddress) {
+          market.underlyingPriceUSD = market.underlyingPrice
+            .div(usdPriceInEth)
+            .truncate(market.underlyingDecimals)
+        }
       }
     }
 
@@ -247,7 +285,7 @@ export function updateMarket(
       .truncate(market.underlyingDecimals)
 
     // Must convert to BigDecimal, and remove 10^18 that is used for Exp in Compound Solidity
-    market.supplyRate = contract
+    market.borrowRate = contract
       .borrowRatePerBlock()
       .toBigDecimal()
       .times(BigDecimal.fromString('2102400'))
@@ -259,9 +297,9 @@ export function updateMarket(
     let supplyRatePerBlock = contract.try_supplyRatePerBlock()
     if (supplyRatePerBlock.reverted) {
       log.info('***CALL FAILED*** : cERC20 supplyRatePerBlock() reverted', [])
-      market.borrowRate = zeroBD
+      market.supplyRate = zeroBD
     } else {
-      market.borrowRate = supplyRatePerBlock.value
+      market.supplyRate = supplyRatePerBlock.value
         .toBigDecimal()
         .times(BigDecimal.fromString('2102400'))
         .div(mantissaFactorBD)
