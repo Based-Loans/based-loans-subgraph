@@ -81,7 +81,7 @@ function getUSDCpriceETH(blockNumber: i32): BigDecimal {
   let comptroller = Comptroller.load('1')
   let oracleAddress = comptroller.priceOracle as Address
   let priceOracle1Address = Address.fromString('02557a5e05defeffd4cae6d83ea3d173b272c904')
-  let USDCAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 '
+  let USDCAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
   let usdPrice: BigDecimal
 
   // See notes on block number if statement in getTokenPrices()
