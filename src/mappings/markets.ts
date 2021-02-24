@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0x39aa39c021dfbae8fac545936693ac917d5e7563'
-let cETHAddress = '0x4ddc2d193948926d02f9b1fe9e1daa0718270ed5'
+let cUSDCAddress = '0xa9861ee63a50e78816080bb46fd0a3e2384b922a'
+let cETHAddress = '0xc21c536d864d541727a801a3781769a08317f4d3'
 let daiAddress = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'
 
 // Used for all cERC20 contracts
@@ -81,7 +81,7 @@ function getUSDCpriceETH(blockNumber: i32): BigDecimal {
   let comptroller = Comptroller.load('1')
   let oracleAddress = comptroller.priceOracle as Address
   let priceOracle1Address = Address.fromString('02557a5e05defeffd4cae6d83ea3d173b272c904')
-  let USDCAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 '
+  let USDCAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
   let usdPrice: BigDecimal
 
   // See notes on block number if statement in getTokenPrices()

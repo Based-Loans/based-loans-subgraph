@@ -339,14 +339,19 @@ export function handleTransfer(event: Transfer): void {
   // We only updateMarket() if accrual block number is not up to date. This will only happen
   // with normal transfers, since mint, redeem, and seize transfers will already run updateMarket()
   let marketID = event.address.toHexString()
-  let market = Market.load(marketID)
-  if (market.accrualBlockNumber != event.block.number.toI32()) {
-    market = updateMarket(
-      event.address,
-      event.block.number.toI32(),
-      event.block.timestamp.toI32(),
-    )
-  }
+  // let market = Market.load(marketID)
+  // if (market.accrualBlockNumber != event.block.number.toI32()) {
+  //   market = updateMarket(
+  //     event.address,
+  //     event.block.number.toI32(),
+  //     event.block.timestamp.toI32(),
+  //   )
+  // }
+  let market = updateMarket(
+    event.address,
+    event.block.number.toI32(),
+    event.block.timestamp.toI32(),
+  )
 
   let amountUnderlying = market.exchangeRate.times(
     event.params.amount.toBigDecimal().div(cTokenDecimalsBD),
