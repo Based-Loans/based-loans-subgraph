@@ -284,7 +284,7 @@ export function updateMarket(
       .div(exponentToBigDecimal(market.underlyingDecimals))
       .truncate(market.underlyingDecimals)
 
-    // Must convert to BigDecimal, and remove 10^18 that is used for Exp in Compound Solidity
+    // Must convert to BigDecimal, and remove 10^18 that is used for Exp in Based Loans Solidity
     market.borrowRate = contract
       .borrowRatePerBlock()
       .toBigDecimal()
