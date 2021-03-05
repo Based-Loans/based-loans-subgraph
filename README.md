@@ -6,12 +6,12 @@
 
 The subgraph can be found on The Graph Hosted Service at https://thegraph.com.
 
-### Ethereum Mainnet Subgraph
+#### Ethereum Mainnet Subgraph
 
 - PlayGround: https://thegraph.com/explorer/subgraph/based-loans/based-loans
 - GraphQL Endpoint: https://api.thegraph.com/subgraphs/name/based-loans/based-loans
 
-### Ethereum Rinkeby Subgraph
+#### Ethereum Rinkeby Subgraph
 
 - PlayGround: https://thegraph.com/explorer/subgraph/based-loans/rinkeby-based-loans
 - GraphQL Endpoint: https://api.thegraph.com/subgraphs/name/based-loans/rinkeby-based-loans
