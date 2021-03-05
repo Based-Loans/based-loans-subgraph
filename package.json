@@ -1,14 +1,14 @@
 {
-  "name": "compound-v2",
+  "name": "based-loans-subgraph",
   "version": "1.0.0",
-  "repository": "https://github.com/Based-Loans/based-loans-v2-subgraph",
+  "repository": "https://github.com/Based-Loans/based-loans-subgraph",
   "license": "MIT",
   "scripts": {
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "create-local": "graph create based-loans/based-loans-v2 --node http://127.0.0.1:8020",
-    "deploy-local": "graph deploy based-loans/based-loans-v2 --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
-    "deploy": "graph deploy based-loans/based-loans-v2 --debug --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "create-local": "graph create based-loans/based-loans --node http://127.0.0.1:8020",
+    "deploy-local": "graph deploy based-loans/based-loans --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020/",
+    "deploy": "graph deploy based-loans/based-loans --debug --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "prodtest": "graph deploy crazydev71/based-loans --debug --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
     "prettier": "./node_modules/.bin/prettier —-write '**/*.ts'"
   },
