@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0x81a3a9eb86f019909249ac418ab2480b96272f26'
-let cETHAddress = '0x0ea8c3ca9ea16c2794a75687d7dbbaa16674d360'
+let cUSDCAddress = '0x4293d932256ee96f232fc62327ca986c5bace7b9'
+let cETHAddress = '0x2fae68686a181f2cf62520268b6f118f357c0ccf'
 let daiAddress = '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea'
 
 // Used for all cERC20 contracts
