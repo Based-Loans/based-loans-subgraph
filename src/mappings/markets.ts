@@ -48,7 +48,7 @@ function getTokenPrice(
   let bdFactor = exponentToBigDecimal(mantissaDecimalFactor)
   let oracle2 = PriceOracle2.bind(oracleAddress)
   underlyingPrice = oracle2
-    .getUnderlyingPrice(eventAddress)
+    .getUnderlyingPriceView(eventAddress)
     .toBigDecimal()
     .div(bdFactor)
 
@@ -66,7 +66,7 @@ function getUSDCpriceETH(blockNumber: i32): BigDecimal {
   let mantissaDecimalFactorUSDC = 18 - 6 + 18
   let bdFactorUSDC = exponentToBigDecimal(mantissaDecimalFactorUSDC)
   usdPrice = oracle2
-    .getUnderlyingPrice(Address.fromString(cUSDCAddress))
+    .getUnderlyingPriceView(Address.fromString(cUSDCAddress))
     .toBigDecimal()
     .div(bdFactorUSDC)
   return usdPrice
@@ -138,7 +138,7 @@ function getETHinUSD(blockNumber: i32): BigDecimal {
   let oracleAddress = comptroller.priceOracle as Address
   let oracle = PriceOracle2.bind(oracleAddress)
   let ethPriceInUSD = oracle
-    .getUnderlyingPrice(Address.fromString(cETHAddress))
+    .getUnderlyingPriceView(Address.fromString(cETHAddress))
     .toBigDecimal()
     .div(mantissaFactorBD)
   return ethPriceInUSD
