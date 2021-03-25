@@ -8,9 +8,9 @@ dataSources:
     name: Comptroller
     network: rinkeby
     source:
-      address: "0xa132762e222b57da497a7fc4e2bb88782a246d8f"
+      address: "0xb5554e41ce39ab4b0bb6f3e40246ac81d4af55e5"
       abi: Comptroller
-      startBlock: 8242284
+      startBlock: 8294562
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
