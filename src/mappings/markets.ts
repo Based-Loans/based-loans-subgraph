@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0xa9861ee63a50e78816080bb46fd0a3e2384b922a'
-let cETHAddress = '0xc21c536d864d541727a801a3781769a08317f4d3'
+let cUSDCAddress = '0xf264bc22982ea5fa8fbb09a1add5e918e3a0b368'
+let cETHAddress = '0x534b8054fa8e3ccbed1d646ea553fd0ffe017a81'
 let daiAddress = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'
 
 // Used for all cERC20 contracts
@@ -160,8 +160,8 @@ export function updateMarket(
     let contractAddress = Address.fromString(market.id)
     let contract = CToken.bind(contractAddress)
 
-    // After block 10678764 price is calculated based on USD instead of ETH
-    if (blockNumber > 10678764) {
+    // After block 12106633 price is calculated based on USD instead of ETH
+    if (blockNumber > 12106633) {
       let ethPriceInUSD = getETHinUSD(blockNumber)
 
       // if cETH, we only update USD price
