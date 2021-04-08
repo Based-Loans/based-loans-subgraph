@@ -55,23 +55,6 @@ function getTokenPrice(
   return underlyingPrice
 }
 
-// Returns the price of USDC in eth. i.e. 0.005 would mean ETH is $200
-function getUSDCpriceETH(blockNumber: i32): BigDecimal {
-  let comptroller = Comptroller.load('1')
-  let oracleAddress = comptroller.priceOracle as Address
-  let usdPrice: BigDecimal
-
-  // See notes on decimal calculation in getTokenPrices()
-  let oracle2 = PriceOracle2.bind(oracleAddress)
-  let mantissaDecimalFactorUSDC = 18 - 6 + 18
-  let bdFactorUSDC = exponentToBigDecimal(mantissaDecimalFactorUSDC)
-  usdPrice = oracle2
-    .getUnderlyingPriceView(Address.fromString(cUSDCAddress))
-    .toBigDecimal()
-    .div(bdFactorUSDC)
-  return usdPrice
-}
-
 export function createMarket(marketAddress: string): Market {
   let market: Market
   let contract = CToken.bind(Address.fromString(marketAddress))
@@ -132,7 +115,7 @@ export function createMarket(marketAddress: string): Market {
   return market
 }
 
-// Only to be used after block 10678764, since it's aimed to fix the change to USD based price oracle.
+// Get USD price of ETH from price oracle.
 function getETHinUSD(blockNumber: i32): BigDecimal {
   let comptroller = Comptroller.load('1')
   let oracleAddress = comptroller.priceOracle as Address
@@ -160,50 +143,25 @@ export function updateMarket(
     let contractAddress = Address.fromString(market.id)
     let contract = CToken.bind(contractAddress)
 
-    // After block 12106633 price is calculated based on USD instead of ETH
-    if (blockNumber > 12106633) {
-      let ethPriceInUSD = getETHinUSD(blockNumber)
+    // Price is calculated based on USD instead of ETH
+    let ethPriceInUSD = getETHinUSD(blockNumber)
 
-      // if cETH, we only update USD price
-      if (market.id == cETHAddress) {
-        market.underlyingPriceUSD = ethPriceInUSD.truncate(market.underlyingDecimals)
-      } else {
-        let tokenPriceUSD = getTokenPrice(
-          blockNumber,
-          contractAddress,
-          market.underlyingAddress as Address,
-          market.underlyingDecimals,
-        )
-        market.underlyingPrice = tokenPriceUSD
-          .div(ethPriceInUSD)
-          .truncate(market.underlyingDecimals)
-        // if USDC, we only update ETH price
-        if (market.id != cUSDCAddress) {
-          market.underlyingPriceUSD = tokenPriceUSD.truncate(market.underlyingDecimals)
-        }
-      }
+    // if cETH, we only update USD price
+    if (market.id == cETHAddress) {
+      market.underlyingPriceUSD = ethPriceInUSD.truncate(market.underlyingDecimals)
     } else {
-      let usdPriceInEth = getUSDCpriceETH(blockNumber)
-
-      // if cETH, we only update USD price
-      if (market.id == cETHAddress) {
-        market.underlyingPriceUSD = market.underlyingPrice
-          .div(usdPriceInEth)
-          .truncate(market.underlyingDecimals)
-      } else {
-        let tokenPriceEth = getTokenPrice(
-          blockNumber,
-          contractAddress,
-          market.underlyingAddress as Address,
-          market.underlyingDecimals,
-        )
-        market.underlyingPrice = tokenPriceEth.truncate(market.underlyingDecimals)
-        // if USDC, we only update ETH price
-        if (market.id != cUSDCAddress) {
-          market.underlyingPriceUSD = market.underlyingPrice
-            .div(usdPriceInEth)
-            .truncate(market.underlyingDecimals)
-        }
+      let tokenPriceUSD = getTokenPrice(
+        blockNumber,
+        contractAddress,
+        market.underlyingAddress as Address,
+        market.underlyingDecimals,
+      )
+      market.underlyingPrice = tokenPriceUSD
+        .div(ethPriceInUSD)
+        .truncate(market.underlyingDecimals)
+      // if USDC, we only update ETH price
+      if (market.id != cUSDCAddress) {
+        market.underlyingPriceUSD = tokenPriceUSD.truncate(market.underlyingDecimals)
       }
     }
 
