@@ -8,9 +8,9 @@ dataSources:
     name: Comptroller
     network: rinkeby
     source:
-      address: "0xb5554e41ce39ab4b0bb6f3e40246ac81d4af55e5"
+      address: "0xdf46847201bc0bdb84dd3d8594a6400f53cc3929"
       abi: Comptroller
-      startBlock: 8294562
+      startBlock: 8374534
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -72,10 +72,10 @@ templates:
         - name: ERC20
           file: ./abis/erc20.json
       eventHandlers:
-#        - event: Mint(address,uint256,uint256)
-#          handler: handleMint
-#        - event: Redeem(address,uint256,uint256)
-#          handler: handleRedeem
+        - event: Mint(address,uint256,uint256)
+          handler: handleMint
+        - event: Redeem(address,uint256,uint256)
+          handler: handleRedeem
         - event: Borrow(address,uint256,uint256,uint256)
           handler: handleBorrow
         - event: RepayBorrow(address,address,uint256,uint256,uint256)
