@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0x2b67cd8cba4033c3e88a50e3abd75900dd55bc15'
-let cETHAddress = '0x3d8ece26d72b2665949f6ad37067c7701998104a'
+let cUSDCAddress = '0x27f6a4c37353e35837a9c2bd9e31f9e4eccb646c'
+let cETHAddress = '0xe16976deba95e9d7d814e8489177ae005dbdc7ff'
 let daiAddress = '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea'
 
 // Used for all cERC20 contracts
@@ -215,7 +215,6 @@ export function updateMarket(
     market.borrowRate = contract
       .borrowRatePerBlock()
       .toBigDecimal()
-      .times(BigDecimal.fromString('2102400'))
       .div(mantissaFactorBD)
       .truncate(mantissaFactor)
 
@@ -228,7 +227,6 @@ export function updateMarket(
     } else {
       market.supplyRate = supplyRatePerBlock.value
         .toBigDecimal()
-        .times(BigDecimal.fromString('2102400'))
         .div(mantissaFactorBD)
         .truncate(mantissaFactor)
     }
