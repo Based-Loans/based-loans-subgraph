@@ -18,9 +18,9 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0xf264bc22982ea5fa8fbb09a1add5e918e3a0b368'
-let cETHAddress = '0x534b8054fa8e3ccbed1d646ea553fd0ffe017a81'
-let daiAddress = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'
+let cUSDCAddress = '0x93675d64b8353151bd02edd24d358234ae9e50fd'
+let cETHAddress = '0xb26b0d26802f1fab83a8f440e306f9b19ea524d4'
+let daiAddress = '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063'
 
 // Used for all cERC20 contracts
 function getTokenPrice(

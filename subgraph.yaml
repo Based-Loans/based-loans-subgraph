@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Comptroller
-    network: mainnet
+    network: matic
     source:
-      address: "0xadf2cd7fdea763156114d665e4bbb31123fa3c3b"
+      address: "0x0d08fb0331d2a78b42cdd21611cbcb3af0dc96bc"
       abi: Comptroller
-      startBlock: 12106633
+      startBlock: 13761602
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
