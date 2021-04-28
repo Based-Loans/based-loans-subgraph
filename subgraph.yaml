@@ -50,7 +50,7 @@ dataSources:
 templates:
   - name: CToken
     kind: ethereum/contract
-    network: mainnet
+    network: matic
     source:
       abi: CToken
     mapping:
