@@ -19,7 +19,7 @@ import {
 } from './helpers'
 
 let cUSDCAddress = '0x93675d64b8353151bd02edd24d358234ae9e50fd'
-let cETHAddress = '0xb26b0d26802f1fab83a8f440e306f9b19ea524d4'
+let cETHAddress = '0xef8dc239a8977cc273990aa7a0046b7292d131f6'
 let daiAddress = '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063'
 
 // Used for all cERC20 contracts
