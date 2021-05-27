@@ -8,9 +8,9 @@ dataSources:
     name: Comptroller
     network: mainnet
     source:
-      address: "0xa4094f24b60634144585dcffdc5a6113751c5a76"
+      address: "0x8049f1b09a4bdeb81bf05d07d4c5ffff48c226c7"
       abi: Comptroller
-      startBlock: 12513140
+      startBlock: 12517200
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4

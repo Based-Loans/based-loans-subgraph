@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0xab5b5ca15c277da7c51b69de9aafdea95ec4f1f2'
-let cETHAddress = '0xbd7234ee99753a3dbe9382319eed61d5850ae407'
+let cUSDCAddress = '0x432f0716c6ce88f52214d6333d4cbd24c699d7fa'
+let cETHAddress = '0xcc93b88a4d2783aaefc2727191a497841fe3f909'
 let daiAddress = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'
 
 // Used for all cERC20 contracts
@@ -57,10 +57,6 @@ function getTokenPrice(
     //   ['try_getUnderlyingPriceView', eventAddress.toHexString(), blockNumber.toString()],
     // )
   }
-  // underlyingPrice = oracle
-  //   .getUnderlyingPriceView(eventAddress)
-  //   .toBigDecimal()
-  //   .div(bdFactor)
 
   return underlyingPrice
 }
@@ -144,11 +140,6 @@ function getETHinUSD(blockNumber: i32): BigDecimal {
     // )
   }
 
-  // ethPriceInUSD = oracle
-  //   .getUnderlyingPriceView(Address.fromString(cETHAddress))
-  //   .toBigDecimal()
-  //   .div(mantissaFactorBD)
-
   return ethPriceInUSD
 }
 
@@ -170,29 +161,29 @@ export function updateMarket(
     // Price is calculated based on USD instead of ETH
     let ethPriceInUSD = getETHinUSD(blockNumber)
 
-    if (ethPriceInUSD != zeroBD) {
-      // Only update when eth price is obtained correctly
-      if (market.id == cETHAddress) {
-        // if cETH, we only update USD price
-        market.underlyingPriceUSD = ethPriceInUSD //.truncate(market.underlyingDecimals)
-      } else {
-        let tokenPriceUSD = getTokenPrice(
-          blockNumber,
-          contractAddress,
-          market.underlyingAddress as Address,
-          market.underlyingDecimals,
-        )
-        if (tokenPriceUSD != zeroBD) {
-          // Only update when token price is obtained correctly
-          market.underlyingPrice = tokenPriceUSD.div(ethPriceInUSD)
-          // .truncate(market.underlyingDecimals)
-          // if USDC, we only update ETH price
-          if (market.id != cUSDCAddress) {
-            market.underlyingPriceUSD = tokenPriceUSD //.truncate(market.underlyingDecimals)
-          }
-        }
+    // if (ethPriceInUSD != zeroBD) {
+    // Only update when eth price is obtained correctly
+    if (market.id == cETHAddress) {
+      // if cETH, we only update USD price
+      market.underlyingPriceUSD = ethPriceInUSD //.truncate(market.underlyingDecimals)
+    } else {
+      let tokenPriceUSD = getTokenPrice(
+        blockNumber,
+        contractAddress,
+        market.underlyingAddress as Address,
+        market.underlyingDecimals,
+      )
+      // if (tokenPriceUSD != zeroBD) {
+      // Only update when token price is obtained correctly
+      market.underlyingPrice = tokenPriceUSD.div(ethPriceInUSD)
+      // .truncate(market.underlyingDecimals)
+      // if USDC, we only update ETH price
+      if (market.id != cUSDCAddress) {
+        market.underlyingPriceUSD = tokenPriceUSD //.truncate(market.underlyingDecimals)
       }
+      // }
     }
+    // }
 
     market.accrualBlockNumber = contract.accrualBlockNumber().toI32()
     market.blockTimestamp = blockTimestamp
