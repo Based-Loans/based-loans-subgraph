@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0xf4f20fedcfaa7e33fdd8b16129a78f29a95821a4'
-let cETHAddress = '0x9443a6e19f3b3d1fdcebe973ee59a466c015dfc3'
+let cUSDCAddress = '0x79e2149fb8afe5e0608c2e2f3fcddf5f283f4928'
+let cETHAddress = '0xc7871bbb558569cb74d86539dbf02eabb7672256'
 let daiAddress = '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea'
 
 // Used for all cERC20 contracts
@@ -186,72 +186,6 @@ export function updateMarket(
       }
     }
 
-    // market.accrualBlockNumber = contract.accrualBlockNumber().toI32()
-    // market.blockTimestamp = blockTimestamp
-    // market.totalSupply = contract
-    //   .totalSupply()
-    //   .toBigDecimal()
-    //   .div(cTokenDecimalsBD)
-
-    // /* Exchange rate explanation
-    //    In Practice
-    //     - If you call the cDAI contract on etherscan it comes back (2.0 * 10^26)
-    //     - If you call the cUSDC contract on etherscan it comes back (2.0 * 10^14)
-    //     - The real value is ~0.02. So cDAI is off by 10^28, and cUSDC 10^16
-    //    How to calculate for tokens with different decimals
-    //     - Must div by tokenDecimals, 10^market.underlyingDecimals
-    //     - Must multiply by ctokenDecimals, 10^8
-    //     - Must div by mantissa, 10^18
-    //  */
-    // market.exchangeRate = contract
-    //   .exchangeRateStored()
-    //   .toBigDecimal()
-    //   .div(exponentToBigDecimal(market.underlyingDecimals))
-    //   .times(cTokenDecimalsBD)
-    //   .div(mantissaFactorBD)
-    //   .truncate(mantissaFactor)
-    // market.borrowIndex = contract
-    //   .borrowIndex()
-    //   .toBigDecimal()
-    //   .div(mantissaFactorBD)
-    //   .truncate(mantissaFactor)
-
-    // market.reserves = contract
-    //   .totalReserves()
-    //   .toBigDecimal()
-    //   .div(exponentToBigDecimal(market.underlyingDecimals))
-    //   .truncate(market.underlyingDecimals)
-    // market.totalBorrows = contract
-    //   .totalBorrows()
-    //   .toBigDecimal()
-    //   .div(exponentToBigDecimal(market.underlyingDecimals))
-    //   .truncate(market.underlyingDecimals)
-    // market.cash = contract
-    //   .getCash()
-    //   .toBigDecimal()
-    //   .div(exponentToBigDecimal(market.underlyingDecimals))
-    //   .truncate(market.underlyingDecimals)
-
-    // // Must convert to BigDecimal, and remove 10^18 that is used for Exp in Based Loans Solidity
-    // market.borrowRate = contract
-    //   .borrowRatePerBlock()
-    //   .toBigDecimal()
-    //   .div(mantissaFactorBD)
-    //   .truncate(mantissaFactor)
-
-    // // This fails on only the first call to cZRX. It is unclear why, but otherwise it works.
-    // // So we handle it like this.
-    // let supplyRatePerBlock = contract.try_supplyRatePerBlock()
-    // if (supplyRatePerBlock.reverted) {
-    //   log.info('***CALL FAILED*** : cERC20 supplyRatePerBlock() reverted', [])
-    //   market.supplyRate = zeroBD
-    // } else {
-    //   market.supplyRate = supplyRatePerBlock.value
-    //     .toBigDecimal()
-    //     .div(mantissaFactorBD)
-    //     .truncate(mantissaFactor)
-    // }
-
     market.accrualBlockNumber = contract.accrualBlockNumber().toI32()
     market.blockTimestamp = blockTimestamp
     let totalSupply = contract.try_totalSupply()
@@ -266,12 +200,12 @@ export function updateMarket(
 
     /* Exchange rate explanation
        In Practice
-        - If you call the vDAI contract on bscscan it comes back (2.0 * 10^26)
-        - If you call the vUSDC contract on bscscan it comes back (2.0 * 10^14)
-        - The real value is ~0.02. So vDAI is off by 10^28, and vUSDC 10^16
+        - If you call the cDAI contract on bscscan it comes back (2.0 * 10^26)
+        - If you call the cUSDC contract on bscscan it comes back (2.0 * 10^14)
+        - The real value is ~0.02. So cDAI is off by 10^28, and cUSDC 10^16
        How to calculate for tokens with different decimals
         - Must div by tokenDecimals, 10^market.underlyingDecimals
-        - Must multiply by vtokenDecimals, 10^8
+        - Must multiply by ctokenDecimals, 10^8
         - Must div by mantissa, 10^18
      */
     let exchangeRateStored = contract.try_exchangeRateStored()
