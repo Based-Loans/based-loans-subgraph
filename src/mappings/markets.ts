@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0xde2859428ad44db556f67a9c4bc6a30e9d846c78'
-let cETHAddress = '0xed9a2148fe48348e976cd58581f44aaf91275105'
+let cUSDCAddress = '0xaf381c77dc3291fe406dbbee7e7da4188519c18a'
+let cETHAddress = '0xd96eec8d784a6eac8293d6ff5f2d2d70ffaaeb54'
 let daiAddress = '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea'
 
 // Used for all cERC20 contracts
@@ -52,11 +52,14 @@ function getTokenPrice(
   if (!underlyingPriceView.reverted) {
     underlyingPrice = underlyingPriceView.value.toBigDecimal().div(bdFactor)
   } else {
-    log.info(
-      'Contract getTokenPrice call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
-      ['try_getUnderlyingPriceView', eventAddress.toHexString(), blockNumber.toString()],
-    )
+    // log.info(
+    //   'Contract getTokenPrice call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
+    //   ['try_getUnderlyingPriceView', eventAddress.toHexString(), blockNumber.toString()],
+    // )
   }
+  // let underlyingPrice = oracle2.getUnderlyingPriceView(eventAddress)
+  //   .toBigDecimal()
+  //   .div(bdFactor)
 
   return underlyingPrice
 }
@@ -134,11 +137,16 @@ function getETHinUSD(blockNumber: i32): BigDecimal {
   if (!underlyingPriceView.reverted) {
     ethPriceInUSD = underlyingPriceView.value.toBigDecimal().div(mantissaFactorBD)
   } else {
-    log.info(
-      'Contract getETHinUSD call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
-      ['try_getUnderlyingPriceView', cETHAddress, blockNumber.toString()],
-    )
+    // log.info(
+    //   'Contract getETHinUSD call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
+    //   ['try_getUnderlyingPriceView', cETHAddress, blockNumber.toString()],
+    // )
   }
+  // let ethPriceInUSD = oracle.getUnderlyingPriceView(
+  //     Address.fromString(cETHAddress)
+  //   )
+  //   .toBigDecimal()
+  //   .div(mantissaFactorBD)
 
   return ethPriceInUSD
 }
@@ -161,27 +169,27 @@ export function updateMarket(
     // Price is calculated based on USD instead of ETH
     let ethPriceInUSD = getETHinUSD(blockNumber)
 
-    if (ethPriceInUSD != zeroBD) {
-      // Only update when eth price is obtained correctly
-      if (market.id == cETHAddress) {
-        // if cETH, we only update USD price
-        market.underlyingPriceUSD = ethPriceInUSD
-      } else {
-        let tokenPriceUSD = getTokenPrice(
-          blockNumber,
-          contractAddress,
-          market.underlyingAddress as Address,
-          market.underlyingDecimals,
-        )
-        if (tokenPriceUSD != zeroBD) {
-          // Only update when token price is obtained correctly
-          market.underlyingPrice = tokenPriceUSD.div(ethPriceInUSD)
-          // if USDC, we only update ETH price
-          if (market.id != cUSDCAddress) {
-            market.underlyingPriceUSD = tokenPriceUSD
-          }
-        }
+    // if (ethPriceInUSD != zeroBD) {
+    // Only update when eth price is obtained correctly
+    if (market.id == cETHAddress) {
+      // if cETH, we only update USD price
+      market.underlyingPriceUSD = ethPriceInUSD
+    } else {
+      let tokenPriceUSD = getTokenPrice(
+        blockNumber,
+        contractAddress,
+        market.underlyingAddress as Address,
+        market.underlyingDecimals,
+      )
+      // if (tokenPriceUSD != zeroBD) {
+      // Only update when token price is obtained correctly
+      market.underlyingPrice = tokenPriceUSD.div(ethPriceInUSD)
+      // if USDC, we only update ETH price
+      if (market.id != cUSDCAddress) {
+        market.underlyingPriceUSD = tokenPriceUSD
       }
+      // }
+      // }
     }
 
     market.accrualBlockNumber = contract.accrualBlockNumber().toI32()
@@ -190,10 +198,10 @@ export function updateMarket(
     if (!totalSupply.reverted) {
       market.totalSupply = totalSupply.value.toBigDecimal().div(cTokenDecimalsBD)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_totalSupply',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_totalSupply',
+      //   market.name,
+      // ])
     }
 
     /* Exchange rate explanation
@@ -215,10 +223,10 @@ export function updateMarket(
         .div(mantissaFactorBD)
         .truncate(mantissaFactor)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_exchangeRateStored',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_exchangeRateStored',
+      //   market.name,
+      // ])
     }
     let borrowIndex = contract.try_borrowIndex()
     if (!borrowIndex.reverted) {
@@ -227,10 +235,10 @@ export function updateMarket(
         .div(mantissaFactorBD)
         .truncate(mantissaFactor)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_borrowIndex',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_borrowIndex',
+      //   market.name,
+      // ])
     }
     let totalReserves = contract.try_totalReserves()
     if (!totalReserves.reverted) {
@@ -239,10 +247,10 @@ export function updateMarket(
         .div(exponentToBigDecimal(market.underlyingDecimals))
         .truncate(market.underlyingDecimals)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_totalReserves',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_totalReserves',
+      //   market.name,
+      // ])
     }
     let totalBorrows = contract.try_totalBorrows()
     if (!totalBorrows.reverted) {
@@ -251,10 +259,10 @@ export function updateMarket(
         .div(exponentToBigDecimal(market.underlyingDecimals))
         .truncate(market.underlyingDecimals)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_totalBorrows',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_totalBorrows',
+      //   market.name,
+      // ])
     }
     let getCash = contract.try_getCash()
     if (!getCash.reverted) {
@@ -263,10 +271,10 @@ export function updateMarket(
         .div(exponentToBigDecimal(market.underlyingDecimals))
         .truncate(market.underlyingDecimals)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_getCash',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_getCash',
+      //   market.name,
+      // ])
     }
     let borrowRatePerBlock = contract.try_borrowRatePerBlock()
     if (!borrowRatePerBlock.reverted) {
@@ -275,10 +283,10 @@ export function updateMarket(
         .div(mantissaFactorBD)
         .truncate(mantissaFactor)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_borrowRatePerBlock',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_borrowRatePerBlock',
+      //   market.name,
+      // ])
     }
     let supplyRatePerBlock = contract.try_supplyRatePerBlock()
     if (!supplyRatePerBlock.reverted) {
@@ -287,10 +295,10 @@ export function updateMarket(
         .div(mantissaFactorBD)
         .truncate(mantissaFactor)
     } else {
-      log.info('Contract call reverted! call_name: {}, market_name: {}', [
-        'try_supplyRatePerBlock',
-        market.name,
-      ])
+      // log.info('Contract call reverted! call_name: {}, market_name: {}', [
+      //   'try_supplyRatePerBlock',
+      //   market.name,
+      // ])
     }
     market.save()
   }
