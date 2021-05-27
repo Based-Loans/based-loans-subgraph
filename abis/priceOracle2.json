@@ -7,51 +7,9 @@
         "type": "uint256"
       },
       {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "cToken",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "underlying",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "symbolHash",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "baseUnit",
-            "type": "uint256"
-          },
-          {
-            "internalType": "enum UniswapConfig.PriceSource",
-            "name": "priceSource",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "fixedPrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "uniswapMarket",
-            "type": "address"
-          },
-          {
-            "internalType": "bool",
-            "name": "isUniswapReversed",
-            "type": "bool"
-          }
-        ],
-        "internalType": "struct UniswapConfig.TokenConfig[]",
-        "name": "configs",
-        "type": "tuple[]"
+        "internalType": "string",
+        "name": "nativeTokenSymbol_",
+        "type": "string"
       }
     ],
     "stateMutability": "nonpayable",
@@ -105,25 +63,6 @@
       }
     ],
     "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "symbol",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
-    ],
-    "name": "PriceUpdated",
     "type": "event"
   },
   {
@@ -614,6 +553,19 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nativeTokenHash",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",

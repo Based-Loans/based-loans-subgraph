@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0x79e2149fb8afe5e0608c2e2f3fcddf5f283f4928'
-let cETHAddress = '0xc7871bbb558569cb74d86539dbf02eabb7672256'
+let cUSDCAddress = '0xde2859428ad44db556f67a9c4bc6a30e9d846c78'
+let cETHAddress = '0xed9a2148fe48348e976cd58581f44aaf91275105'
 let daiAddress = '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea'
 
 // Used for all cERC20 contracts
@@ -165,7 +165,7 @@ export function updateMarket(
       // Only update when eth price is obtained correctly
       if (market.id == cETHAddress) {
         // if cETH, we only update USD price
-        market.underlyingPriceUSD = ethPriceInUSD.truncate(market.underlyingDecimals)
+        market.underlyingPriceUSD = ethPriceInUSD
       } else {
         let tokenPriceUSD = getTokenPrice(
           blockNumber,
@@ -175,12 +175,10 @@ export function updateMarket(
         )
         if (tokenPriceUSD != zeroBD) {
           // Only update when token price is obtained correctly
-          market.underlyingPrice = tokenPriceUSD
-            .div(ethPriceInUSD)
-            .truncate(market.underlyingDecimals)
+          market.underlyingPrice = tokenPriceUSD.div(ethPriceInUSD)
           // if USDC, we only update ETH price
           if (market.id != cUSDCAddress) {
-            market.underlyingPriceUSD = tokenPriceUSD.truncate(market.underlyingDecimals)
+            market.underlyingPriceUSD = tokenPriceUSD
           }
         }
       }
