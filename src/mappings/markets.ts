@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0xf264bc22982ea5fa8fbb09a1add5e918e3a0b368'
-let cETHAddress = '0x534b8054fa8e3ccbed1d646ea553fd0ffe017a81'
+let cUSDCAddress = '0xab5b5ca15c277da7c51b69de9aafdea95ec4f1f2'
+let cETHAddress = '0xbd7234ee99753a3dbe9382319eed61d5850ae407'
 let daiAddress = '0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359'
 
 // Used for all cERC20 contracts
@@ -46,17 +46,21 @@ function getTokenPrice(
    */
   let mantissaDecimalFactor = 18 - underlyingDecimals + 18
   let bdFactor = exponentToBigDecimal(mantissaDecimalFactor)
-  let oracle2 = PriceOracle2.bind(oracleAddress)
+  let oracle = PriceOracle2.bind(oracleAddress)
 
-  let underlyingPriceView = oracle2.try_getUnderlyingPriceView(eventAddress)
-  if (!underlyingPriceView.reverted) {
-    underlyingPrice = underlyingPriceView.value.toBigDecimal().div(bdFactor)
-  } else {
-    log.info(
-      'Contract getTokenPrice call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
-      ['try_getUnderlyingPriceView', eventAddress.toHexString(), blockNumber.toString()],
-    )
-  }
+  // let underlyingPriceView = oracle.try_getUnderlyingPriceView(eventAddress)
+  // if (!underlyingPriceView.reverted) {
+  //   underlyingPrice = underlyingPriceView.value.toBigDecimal().div(bdFactor)
+  // } else {
+  //   log.info(
+  //     'Contract getTokenPrice call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
+  //     ['try_getUnderlyingPriceView', eventAddress.toHexString(), blockNumber.toString()],
+  //   )
+  // }
+  underlyingPrice = oracle
+    .getUnderlyingPriceView(eventAddress)
+    .toBigDecimal()
+    .div(bdFactor)
 
   return underlyingPrice
 }
@@ -128,17 +132,22 @@ function getETHinUSD(blockNumber: i32): BigDecimal {
   let oracle = PriceOracle2.bind(oracleAddress)
   let ethPriceInUSD = zeroBD
 
-  let underlyingPriceView = oracle.try_getUnderlyingPriceView(
-    Address.fromString(cETHAddress),
-  )
-  if (!underlyingPriceView.reverted) {
-    ethPriceInUSD = underlyingPriceView.value.toBigDecimal().div(mantissaFactorBD)
-  } else {
-    log.info(
-      'Contract getETHinUSD call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
-      ['try_getUnderlyingPriceView', cETHAddress, blockNumber.toString()],
-    )
-  }
+  // let underlyingPriceView = oracle.try_getUnderlyingPriceView(
+  //   Address.fromString(cETHAddress),
+  // )
+  // if (!underlyingPriceView.reverted) {
+  //   ethPriceInUSD = underlyingPriceView.value.toBigDecimal().div(mantissaFactorBD)
+  // } else {
+  //   log.info(
+  //     'Contract getETHinUSD call reverted! call_name: {}, ctoken_address: {}, blockNumber: {}',
+  //     ['try_getUnderlyingPriceView', cETHAddress, blockNumber.toString()],
+  //   )
+  // }
+
+  ethPriceInUSD = oracle
+    .getUnderlyingPriceView(Address.fromString(cETHAddress))
+    .toBigDecimal()
+    .div(mantissaFactorBD)
 
   return ethPriceInUSD
 }
@@ -165,7 +174,7 @@ export function updateMarket(
       // Only update when eth price is obtained correctly
       if (market.id == cETHAddress) {
         // if cETH, we only update USD price
-        market.underlyingPriceUSD = ethPriceInUSD.truncate(market.underlyingDecimals)
+        market.underlyingPriceUSD = ethPriceInUSD //.truncate(market.underlyingDecimals)
       } else {
         let tokenPriceUSD = getTokenPrice(
           blockNumber,
@@ -175,12 +184,11 @@ export function updateMarket(
         )
         if (tokenPriceUSD != zeroBD) {
           // Only update when token price is obtained correctly
-          market.underlyingPrice = tokenPriceUSD
-            .div(ethPriceInUSD)
-            .truncate(market.underlyingDecimals)
+          market.underlyingPrice = tokenPriceUSD.div(ethPriceInUSD)
+          // .truncate(market.underlyingDecimals)
           // if USDC, we only update ETH price
           if (market.id != cUSDCAddress) {
-            market.underlyingPriceUSD = tokenPriceUSD.truncate(market.underlyingDecimals)
+            market.underlyingPriceUSD = tokenPriceUSD //.truncate(market.underlyingDecimals)
           }
         }
       }
