@@ -18,8 +18,8 @@ import {
   zeroBD,
 } from './helpers'
 
-let cUSDCAddress = '0xaf381c77dc3291fe406dbbee7e7da4188519c18a'
-let cETHAddress = '0xd96eec8d784a6eac8293d6ff5f2d2d70ffaaeb54'
+let cUSDCAddress = '0x5e053b1c3422de42a5a3dd505e572f02d1cb8c00'
+let cETHAddress = '0x7b4692e0f0cf92f537b6abe6f632a667ff5cd898'
 let daiAddress = '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea'
 
 // Used for all cERC20 contracts
@@ -57,9 +57,6 @@ function getTokenPrice(
     //   ['try_getUnderlyingPriceView', eventAddress.toHexString(), blockNumber.toString()],
     // )
   }
-  // let underlyingPrice = oracle2.getUnderlyingPriceView(eventAddress)
-  //   .toBigDecimal()
-  //   .div(bdFactor)
 
   return underlyingPrice
 }
@@ -142,11 +139,6 @@ function getETHinUSD(blockNumber: i32): BigDecimal {
     //   ['try_getUnderlyingPriceView', cETHAddress, blockNumber.toString()],
     // )
   }
-  // let ethPriceInUSD = oracle.getUnderlyingPriceView(
-  //     Address.fromString(cETHAddress)
-  //   )
-  //   .toBigDecimal()
-  //   .div(mantissaFactorBD)
 
   return ethPriceInUSD
 }
